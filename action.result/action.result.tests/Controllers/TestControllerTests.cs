@@ -33,10 +33,10 @@ namespace Tests.Controllers
         {
             TestController controller = new TestController();
 
-            // TODO Il faut éviter des faire des tests asynchrones, alors on ne fait pas
-            // var actionResult = await controller.Testing(0);
-            // Plutôt que d'utilisier await, on utilise .Result
+            // TODO Pour éviter des faire des tests asynchrones, on peut utiliser .Result
+            // Plutôt que d'utilisier await (Mais on évite dans le code normal, car ça bloque le thread)
             var actionResult = controller.Testing(0).Result;
+
 
             // TODO On converti le ActionResult en NotFoundResult, car l'action devrait faire
             // return NotFound();
@@ -46,38 +46,12 @@ namespace Tests.Controllers
         }
 
         [TestMethod]
-        public void Testing_NotFound_BadTest()
-        {
-            TestController controller = new TestController();
-
-            var actionResult = controller.Testing(200).Result;
-
-            var result = actionResult.Result as NotFoundResult;
-
-            // TODO Comme que le id est 200, l'action retourne
-            // return Ok(200);
-            // Alors la conversion en NotFoundResult donne une valeur null
-            Assert.IsNotNull(result);
-        }
-
-        [TestMethod]
         public void Testing_BadRequest()
         {
             TestController controller = new TestController();
 
+            // Le code du contrôleur retourne un BadRequest si l'Id est 1 (hardcodé)
             var actionResult = controller.Testing(1).Result;
-            var result = actionResult.Result as BadRequestResult;
-
-            Assert.IsNotNull(result);
-        }
-
-        [TestMethod]
-        public void Testing_BadRequest_BadTest()
-        {
-            TestController controller = new TestController();
-
-            var actionResult = controller.Testing(200).Result;
-
             var result = actionResult.Result as BadRequestResult;
 
             Assert.IsNotNull(result);
@@ -88,42 +62,21 @@ namespace Tests.Controllers
         {
             TestController controller = new TestController();
 
-            var actionResult = controller.Testing(200).Result;
+            var actionResult = controller.Testing(42).Result;
             // TODO On utilise un OkObjectResult plutôt que OkResult, puisqu'on retourne
-            // return Ok(200);
+            // return Ok(42);
             // Comme il y a une valeur dans le l'action result, on utilise la version
             // [Action]ObjectResult plutôt que juste [Action]Result
-            var result = actionResult.Result as OkObjectResult;
+            OkObjectResult? result = actionResult.Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(200, result.Value);
-        }
+            // Avec un OkObjectResult, on peut accéder à la valeur
+            Assert.AreEqual(42, result.Value);
 
-        [TestMethod]
-        public void Testing_Ok_BadTest()
-        {
-            TestController controller = new TestController();
-
-            var actionResult = controller.Testing(1).Result;
-
-            var result = actionResult.Result as OkObjectResult;
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(200, result.Value);
-        }
-
-        [TestMethod]
-        public void Testing_Ok_BadTest_NoValue()
-        {
-            TestController controller = new TestController();
-
-            var actionResult = controller.Testing(1).Result;
-
-            var result = actionResult.Result as OkResult;
-
-            Assert.IsNotNull(result);
-            // TODO on ne peut pas valider la valeur du retour
-            // Assert.AreEqual(200, result.Value);
+            // ATTENTION, en utilisant Ok(x), l'objet est OkObjectResult et n'est PAS un OkResult (en utilisant simplement Ok())
+            var resultWithoutObject = actionResult.Result as OkResult;
+            // ICI, on montre que le Result n'est PAS un OkResult (Pas nécessaire de le faire à chaque fois, c'est seulement pour la démonstration)
+            Assert.IsNull(resultWithoutObject);
         }
     }
 }
