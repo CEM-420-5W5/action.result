@@ -46,6 +46,19 @@ namespace Tests.Controllers
         }
 
         [TestMethod]
+        public async void Testing_NotFound_Async()
+        {
+            TestController controller = new TestController();
+
+            // Sinon, vous pouvez quand même utiliser await pour faire des tests asynchrones, mais il faut que la méthode de test soit async Task et PAS void !!
+            // Si vous retournez void, le test ne sera pas attendu et vous aurez un point d'exclamation bleu à côté du test qui ne se terminera JAMAIS
+            // Sinon, c'est le mêem test que le précédent, mais en utilisant await
+            var actionResult = await controller.Testing(0);
+            var result = actionResult.Result as NotFoundResult;
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
         public void Testing_BadRequest()
         {
             TestController controller = new TestController();
